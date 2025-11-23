@@ -12,7 +12,8 @@
 bool DEBUG = true;
 static bool TERM_SUPPORTS_COLOR = false;
 
-void enable_terminal_colors() {
+void enable_terminal_colors()
+{
 #ifdef _WIN32
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) { TERM_SUPPORTS_COLOR = false; return; }
@@ -34,14 +35,27 @@ const char* COL_DARKGRAY() { return "\x1b[90m"; }
 const char* COL_YELLOW() { return "\e[93m"; }
 const char* COL_RED() { return "\x1b[31m"; }
 
-void colored_fprintf(FILE* out, const char* color, const std::string &msg) {
-    if (TERM_SUPPORTS_COLOR && color) {
+void colored_fprintf(FILE* out, const char* color, const std::string &msg)
+{
+    if (TERM_SUPPORTS_COLOR && color)
+    {
         fprintf(out, "%s%s%s\n", color, msg.c_str(), COL_RESET());
-    } else {
+    }
+    else
+    {
         fprintf(out, "%s\n", msg.c_str());
     }
 }
 
-void dbg(const std::string &s){ if(DEBUG) colored_fprintf(stderr, COL_DARKGRAY(), std::string("[dbg] ")+s); }
-void info(const std::string &s){ if(DEBUG) colored_fprintf(stdout, COL_YELLOW(), std::string("[info] ")+s); }
-void errlog(const std::string &s){ colored_fprintf(stderr, COL_RED(), std::string("[err] ")+s); }
+void dbg(const std::string &s)
+{
+    if(DEBUG) colored_fprintf(stderr, COL_DARKGRAY(), std::string("[dbg] ")+s);
+}
+void info(const std::string &s)
+{
+    if(DEBUG) colored_fprintf(stdout, COL_YELLOW(), std::string("[info] ")+s);
+}
+void errlog(const std::string &s)
+{
+    colored_fprintf(stderr, COL_RED(), std::string("[err] ")+s);
+}

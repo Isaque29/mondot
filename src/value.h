@@ -5,11 +5,19 @@
 #include <string>
 #include <cstdint>
 
-struct Rule { uint16_t type = 0; uint32_t id = 0; };
+struct Rule
+{
+    uint16_t type = 0;
+    uint32_t id = 0;
+};
 
-enum class Tag { Nil, Number, String, Rule };
+enum class Tag
+{
+    Nil, Number, String, Rule
+};
 
-struct Value {
+struct Value
+{
     Tag tag = Tag::Nil;
     double num = 0.0;
     std::shared_ptr<std::string> s;
@@ -24,4 +32,4 @@ struct Value {
 
 std::string value_to_string(const Value &v);
 
-#endif // MONDOT_VALUE_H
+#endif

@@ -22,19 +22,22 @@ int main(int argc, char **argv)
     cin.tie(nullptr);
     enable_terminal_colors();
 
-    if(argc < 2){ cout << "Usage: mondot <scripts-dir>\n"; return 1; }
+    if(argc < 2)
+    {
+        cout << "Usage: mondot <scripts-dir>\n";
+        return 1;
+    }
     string scripts_dir = argv[1];
     VM vm(GLOBAL_HOST);
 
     vector<ScriptFile> scripts;
     for(auto &p : fs::directory_iterator(scripts_dir))
     {
-        if(p.is_regular_file()){
+        if(p.is_regular_file())
+        {
             string ext = p.path().extension().string();
             if(ext==".mdot" || ext==".mondot" || ext==".mon")
-            {
                 scripts.push_back({p.path().string(), p.last_write_time()});
-            }
         }
     }
 
@@ -80,7 +83,7 @@ int main(int argc, char **argv)
         }
     }
 
-    atomic<bool> stop{false};
+    atomic<bool> stop {false};
     thread watcher([&]
     {
         while(!stop.load())
@@ -119,7 +122,8 @@ int main(int argc, char **argv)
                                     G_MODULES.hot_swap(m);
 
                                     // call MdReload if present
-                                    if(m->bytecode.handler_index.count("MdReload")){
+                                    if(m->bytecode.handler_index.count("MdReload"))
+                                    {
                                         info("Calling MdReload for module " + m->name);
                                         vm.execute_handler(m, "MdReload");
                                     }

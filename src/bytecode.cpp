@@ -66,7 +66,7 @@ CompiledUnit compile_unit(UnitDecl *u)
                     }
                     else throw runtime_error(string("unsupported call in assignment: ")+ e->call_name);
                 }
-                else if(e->kind==Expr::KIdent)
+                else if(e->kind == Expr::KIdent)
                 {
                     int lid = add_local(st->lhs);
                     Op o(OP_LOAD_GLOBAL, 0, lid);
@@ -78,30 +78,30 @@ CompiledUnit compile_unit(UnitDecl *u)
                     throw runtime_error("unsupported rhs expr in assignment");
                 }
             }
-            else if(st->kind==Stmt::KExpr)
+            else if(st->kind == Stmt::KExpr)
             {
                 Expr *e = st->expr.get();
-                if(e->kind==Expr::KCall)
+                if(e->kind == Expr::KCall)
                 {
-                    if(e->call_name=="Print")
+                    if(e->call_name == "Print")
                     {
-                        if(e->args.size()==1)
+                        if(e->args.size() == 1)
                         {
                             Expr *arg = e->args[0].get();
-                            if(arg->kind==Expr::KIdent)
+                            if(arg->kind == Expr::KIdent)
                             {
                                 Op o(OP_LOAD_GLOBAL, 0, 0);
                                 o.s = arg->ident; bf.code.push_back(o);
                                 bf.code.emplace_back(OP_PRINT,0,0);
                             }
-                            else if(arg->kind==Expr::KString)
+                            else if(arg->kind == Expr::KString)
                             {
                                 bf.consts.push_back(Value::make_string(arg->str));
                                 int ci=(int)bf.consts.size()-1;
                                 bf.code.emplace_back(OP_LOAD_STR,ci,0);
                                 bf.code.emplace_back(OP_PRINT,0,0);
                             }
-                            else if(arg->kind==Expr::KNumber)
+                            else if(arg->kind == Expr::KNumber)
                             {
                                 bf.consts.push_back(Value::make_number(arg->num));
                                 int ci=(int)bf.consts.size()-1;
@@ -114,7 +114,7 @@ CompiledUnit compile_unit(UnitDecl *u)
                     }
                     else
                     {
-                        if(e->call_name=="Spawn")
+                        if(e->call_name == "Spawn")
                         {
                             if(e->args.size()>=1 && e->args[0]->kind==Expr::KString)
                             {
@@ -139,7 +139,7 @@ CompiledUnit compile_unit(UnitDecl *u)
             bf.code.emplace_back(OP_DROP, (int)i, 0);
         }
 
-        bf.code.emplace_back(OP_RET,0,0);
+        bf.code.emplace_back(OP_RET, 0, 0);
         int idx = (int)cu.module.funcs.size();
         cu.module.funcs.push_back(move(bf));
         cu.module.handler_index[h->name]=idx;

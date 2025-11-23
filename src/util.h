@@ -16,4 +16,4 @@ void dbg(const std::string &s);
 void info(const std::string &s);
 void errlog(const std::string &s);
 
-#endif // MONDOT_UTIL_H
+#endif

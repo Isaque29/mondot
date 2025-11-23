@@ -21,4 +21,4 @@ struct Parser {
     std::unique_ptr<Expr> parse_call(const std::string &name);
 };
 
-#endif // MONDOT_PARSER_H
+#endif

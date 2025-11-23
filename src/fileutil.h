@@ -11,4 +11,4 @@ struct ScriptFile {
     std::filesystem::file_time_type last_write;
 };
 
-#endif // MONDOT_FILEUTIL_H
+#endif

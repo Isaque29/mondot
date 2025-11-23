@@ -6,7 +6,8 @@ using namespace std;
 
 VM::VM(HostBridge &h): host(h) {}
 
-void VM::execute_handler(Module* m, const string &handler_name){
+void VM::execute_handler(Module* m, const string &handler_name)
+{
     if(!m) return;
     auto it = m->bytecode.handler_index.find(handler_name);
     if(it==m->bytecode.handler_index.end()){
@@ -17,9 +18,12 @@ void VM::execute_handler(Module* m, const string &handler_name){
     execute_handler_idx(m, idx);
 }
 
-void VM::execute_handler_idx(Module* m, int idx){
+void VM::execute_handler_idx(Module* m, int idx)
+{
     if(!m) return;
-    if(idx < 0 || idx >= (int)m->bytecode.funcs.size()){
+
+    if(idx < 0 || idx >= (int)m->bytecode.funcs.size())
+    {
         dbg("execute_handler_idx: invalid idx");
         return;
     }
@@ -33,34 +37,41 @@ void VM::execute_handler_idx(Module* m, int idx){
     m->active_calls.fetch_add(1);
     dbg(string("VM: enter handler ") + to_string(idx) + " in module " + m->name);
 
-    for(size_t ip = 0; ip < f.code.size(); ++ip){
+    for(size_t ip = 0; ip < f.code.size(); ++ip)
+    {
         Op &op = f.code[ip];
         switch(op.op){
-            case OP_LOAD_NUM: {
+            case OP_LOAD_NUM:
+            {
                 Value v = f.consts[op.a]; // copy
                 if(op.b >= 0 && op.b < (int)frame.locals.size()) frame.locals[op.b] = v;
                 break;
             }
-            case OP_LOAD_STR: {
+            case OP_LOAD_STR:
+            {
                 Value v = f.consts[op.a];
                 if(op.b >= 0 && op.b < (int)frame.locals.size()) frame.locals[op.b] = v;
                 break;
             }
-            case OP_LOAD_GLOBAL: {
+            case OP_LOAD_GLOBAL:
+            {
                 string gname = op.s;
                 Value gv = load_global(m, gname);
                 if(op.b >= 0 && op.b < (int)frame.locals.size()) frame.locals[op.b] = gv;
                 break;
             }
-            case OP_STORE_GLOBAL: {
-                // não implementado no protótipo mínimo
+            case OP_STORE_GLOBAL:
+            {
+                // TODO
                 break;
             }
-            case OP_PRINT: {
-                // imprime o local mais recente não-nil, ou "nil"
+            case OP_PRINT:
+            {
                 bool printed = false;
-                for(int i = (int)frame.locals.size() - 1; i >= 0; --i){
-                    if(frame.locals[i].tag != Tag::Nil){
+                for(int i = (int)frame.locals.size() - 1; i >= 0; --i)
+                {
+                    if(frame.locals[i].tag != Tag::Nil)
+                    {
                         cout << value_to_string(frame.locals[i]) << '\n';
                         cout.flush();
                         printed = true;
@@ -70,31 +81,35 @@ void VM::execute_handler_idx(Module* m, int idx){
                 if(!printed) cout << "nil" << endl;
                 break;
             }
-            case OP_SPAWN: {
+            case OP_SPAWN:
+            {
                 Value arg = f.consts[op.a];
                 string typ = (arg.tag == Tag::String && arg.s) ? *arg.s : string("?");
                 Rule r = host.create_rule(typ);
                 Value rv = Value::make_rule(r);
                 if(op.b >= 0 && op.b < (int)frame.locals.size()) frame.locals[op.b] = rv;
-                else { dbg("spawn returned tmp dropped"); }
+                else dbg("spawn returned tmp dropped");
                 break;
             }
-            case OP_DROP: {
+            case OP_DROP:
+            {
                 int slot = op.a;
-                if(slot == -1){
-                    // drop last used temp (conservador)
-                    if(!frame.locals.empty()){
+                if(slot == -1)
+                {
+                    if(!frame.locals.empty())
+                    {
                         int last = (int)frame.locals.size() - 1;
                         frame.locals[last] = Value();
                     }
-                } else if(slot >= 0 && slot < (int)frame.locals.size()){
-                    frame.locals[slot] = Value();
                 }
+                else if(slot >= 0 && slot < (int)frame.locals.size())
+                    frame.locals[slot] = Value();
                 break;
             }
-            case OP_RET: {
-                // limpar locais e sair
+            case OP_RET:
+            {
                 for(auto &lv : frame.locals) lv = Value();
+                
                 m->active_calls.fetch_sub(1);
                 dbg("VM: exit handler");
                 return;
@@ -105,13 +120,16 @@ void VM::execute_handler_idx(Module* m, int idx){
         }
     }
 
-    // se chegou ao fim do código sem RET
-    for(auto &lv : frame.locals) lv = Value();
+    // if the code has reached its end without RET.
+    for(auto &lv : frame.locals)
+        lv = Value();
+    
     m->active_calls.fetch_sub(1);
 }
 
-Value VM::load_global(Module* m, const string &name){
-    // protótipo mínimo: não há tabela de globals -> retorna nil e loga
+Value VM::load_global(Module* m, const string &name)
+{
+    // prototype: no globals table -> returns nil and logs
     dbg("load_global: " + name + " (not implemented) in module " + m->name);
     return Value::make_nil();
 }
