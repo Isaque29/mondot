@@ -1,0 +1,6 @@
+unit Program
+{
+    on MdSuperInit -> ()
+        Print('Main init from unit Proram');
+    end
+}

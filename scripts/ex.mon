@@ -1,0 +1,17 @@
+unit Ex
+{
+    on MdInit -> ()
+        msg = 'unit loaded. executing...';
+        Print(msg);
+    end
+
+    on MdReload -> ()
+        Print('here i\'m about run the program');
+        Print('here i\'m about run the program');
+        
+        x = Spawn('oi');
+        Print(x);
+        
+        Print('mnmnmnmnmnmnmnm');
+    end
+}
