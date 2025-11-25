@@ -7,6 +7,13 @@ Value Value::make_nil()
 {
     return Value();
 }
+Value Value::make_boolean(bool b)
+{
+    Value v;
+    v.tag = Tag::Boolean;
+    v.boolean = b;
+    return v;
+}
 Value Value::make_number(double n)
 {
     Value v;
@@ -34,6 +41,7 @@ string value_to_string(const Value &v)
     switch(v.tag)
     {
         case Tag::Nil: return "nil";
+        case Tag::Boolean: return v.boolean? "true": "false";
         case Tag::Number:
         {
             ostringstream oss;

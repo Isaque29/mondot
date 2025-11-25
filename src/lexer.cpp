@@ -39,6 +39,9 @@ Token Lexer::next() {
         else if(s == "foreach") t.kind = TokenKind::Kw_foreach;
         else if(s == "in") t.kind = TokenKind::Kw_in;
         else if(s == "return") t.kind = TokenKind::Kw_return;
+        else if(s == "true") t.kind = TokenKind::Boolean;
+        else if(s == "false") t.kind = TokenKind::Boolean;
+        else if(s == "nil") t.kind = TokenKind::Nil;
         else t.kind = TokenKind::Identifier;
         t.text = s;
         return t;

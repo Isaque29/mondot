@@ -36,6 +36,10 @@ ExprPtr Expr::make_number(double n) {
     return make_unique<Expr>(n);
 }
 
+ExprPtr Expr::make_boolean(bool n) {
+    return make_unique<Expr>(n);
+}
+
 ExprPtr Expr::make_string(const std::string &s) {
     return make_unique<Expr>(s, true);
 }

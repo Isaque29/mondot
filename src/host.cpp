@@ -5,7 +5,7 @@ Rule HostBridge::create_rule(const std::string &type) {
     return Rule{(uint16_t)1, id};
 }
 void HostBridge::release_rule(const Rule &r) {
-    // noop for now
+    // TODO
 }
 void HostBridge::register_function(const std::string &name, HostFn fn) {
     functions[name] = std::move(fn);
@@ -19,5 +19,4 @@ Value HostBridge::call_function(const std::string &name, const std::vector<Value
     return Value::make_nil();
 }
 
-// define the global instance
 HostBridge GLOBAL_HOST;

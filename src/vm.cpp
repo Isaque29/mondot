@@ -44,7 +44,8 @@ Value VM::call_bytecode_function(Module* m, int func_idx, const vector<Value> &a
     vector<Value> eval_stack;
     for(size_t ip=0; ip < f.code.size(); ++ip) {
         Op &op = f.code[ip];
-        switch(op.op) {
+        switch(op.op)
+        {
             case OP_PUSH_CONST:
                 if(valid_const_idx(f, op.a)) eval_stack.push_back(f.consts[op.a]);
                 else eval_stack.push_back(Value::make_nil());
@@ -71,7 +72,8 @@ Value VM::call_bytecode_function(Module* m, int func_idx, const vector<Value> &a
                 if((int)eval_stack.size() < nargs + (op.b==-2 ? 1 : 0)) { errlog("CALL: stack underflow"); break; }
                 vector<Value> argsv(nargs);
                 // when op.b == -2, callee is on top after args were pushed last -> pop callee then pop nargs
-                if(op.b == -2) {
+                if(op.b == -2)
+                {
                     Value callee = eval_stack.back(); eval_stack.pop_back();
                     for(int i=nargs-1;i>=0;--i){ argsv[i] = eval_stack.back(); eval_stack.pop_back(); }
                     // callee should be a number with function index
@@ -119,14 +121,16 @@ Value VM::call_bytecode_function(Module* m, int func_idx, const vector<Value> &a
                 if(!eval_stack.empty()) return eval_stack.back();
                 return Value::make_nil();
             case OP_SPAWN:
-                if(valid_const_idx(f, op.a)) {
+                if(valid_const_idx(f, op.a))
+                {
                     Value arg = f.consts[op.a];
                     string typ = (arg.tag==Tag::String && arg.s) ? *arg.s : string("?");
                     Rule r = host.create_rule(typ);
                     Value rv = Value::make_rule(r);
                     if(op.b >= 0 && valid_local_idx(frame, op.b)) frame.locals[op.b] = rv;
                     else dbg("SPAWN: tmp dropped or invalid local");
-                } else dbg("SPAWN: invalid const index");
+                }
+                else dbg("SPAWN: invalid const index");
                 break;
             case OP_DROP:
                 if(op.a == -1) { if(!frame.locals.empty()) frame.locals.back() = Value(); }
@@ -168,7 +172,11 @@ void VM::execute_handler_idx(Module* m, int idx) {
                 eval_stack.push_back(load_global(m, op.s));
                 break;
             case OP_STORE_LOCAL:
-                if(eval_stack.empty()){ errlog("STORE_LOCAL: underflow"); break; }
+                if(eval_stack.empty())
+                {
+                    errlog("STORE_LOCAL: underflow");
+                    break;
+                }
                 {
                     Value v = eval_stack.back(); eval_stack.pop_back();
                     if(valid_local_idx(frame, op.a)) frame.locals[op.a] = v; else dbg("STORE_LOCAL invalid");
@@ -212,39 +220,53 @@ void VM::execute_handler_idx(Module* m, int idx) {
                 ip = (size_t)op.a - 1;
                 break;
             case OP_JMP_IF_FALSE: {
-                if(eval_stack.empty()){ errlog("JMP_IF_FALSE underflow"); break; }
-                Value cond = eval_stack.back(); eval_stack.pop_back();
+                if(eval_stack.empty())
+                {
+                    errlog("JMP_IF_FALSE underflow");
+                    break;
+                }
+                Value cond = eval_stack.back();
+                eval_stack.pop_back();
                 bool truth = true;
-                if(cond.tag == Tag::Nil) truth = false;
+                if(cond.tag == Tag::Boolean && !cond.boolean) truth = false;
+                else if(cond.tag == Tag::Nil) truth = false;
                 else if(cond.tag == Tag::Number && cond.num == 0.0) truth = false;
                 if(!truth) ip = (size_t)op.a - 1;
                 break;
             }
             case OP_RET:
                 // return top of eval stack or nil
-                if(!eval_stack.empty()) {
+                if(!eval_stack.empty())
+                {
                     Value r = eval_stack.back();
                     // clear locals
                     for(auto &lv : frame.locals) lv = Value();
                     dbg("VM: exit handler");
                     return;
-                } else {
+                }
+                else
+                {
                     for(auto &lv : frame.locals) lv = Value();
                     dbg("VM: exit handler");
                     return;
                 }
             case OP_SPAWN:
-                if(valid_const_idx(f, op.a)) {
+                if(valid_const_idx(f, op.a))
+                {
                     Value arg = f.consts[op.a];
                     string typ = (arg.tag==Tag::String && arg.s) ? *arg.s : string("?");
                     Rule r = host.create_rule(typ);
                     Value rv = Value::make_rule(r);
                     if(op.b >= 0 && valid_local_idx(frame, op.b)) frame.locals[op.b] = rv;
                     else dbg("SPAWN tmp dropped");
-                } else dbg("SPAWN invalid const");
+                }
+                else dbg("SPAWN invalid const");
                 break;
             case OP_DROP:
-                if(op.a == -1) { if(!frame.locals.empty()) frame.locals.back() = Value(); }
+                if(op.a == -1)
+                {
+                    if(!frame.locals.empty()) frame.locals.back() = Value();
+                }
                 else if(valid_local_idx(frame, op.a)) frame.locals[op.a] = Value();
                 else dbg("DROP invalid local");
                 break;

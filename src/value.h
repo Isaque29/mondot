@@ -13,18 +13,20 @@ struct Rule
 
 enum class Tag
 {
-    Nil, Number, String, Rule
+    Nil, Boolean, Number, String, Rule
 };
 
 struct Value
 {
     Tag tag = Tag::Nil;
+    bool boolean = false;
     double num = 0.0;
     std::shared_ptr<std::string> s;
     std::shared_ptr<Rule> r;
 
     Value() = default;
     static Value make_nil();
+    static Value make_boolean(bool n);
     static Value make_number(double n);
     static Value make_string(const std::string &str);
     static Value make_rule(const Rule &rule);

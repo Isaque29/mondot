@@ -14,6 +14,7 @@ using StmtPtr = std::unique_ptr<Stmt>;
 
 struct Expr {
     enum Kind {
+        KBoolean,
         KNumber,
         KString,
         KIdent,
@@ -45,6 +46,7 @@ struct Expr {
     Expr(const std::string &s, bool isString);
     Expr(const std::string &name, std::vector<ExprPtr> &&a); // call
     static ExprPtr make_ident(const std::string &id);
+    static ExprPtr make_boolean(bool n);
     static ExprPtr make_number(double n);
     static ExprPtr make_string(const std::string &s);
     static ExprPtr make_call(const std::string &name, std::vector<ExprPtr> &&args);

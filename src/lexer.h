@@ -3,10 +3,13 @@
 
 #include <string>
 
-enum class TokenKind {
+enum class TokenKind
+{
     End,
     Identifier,
+    Boolean,
     Number,
+    Nil,
     String,
     Kw_unit,
     Kw_on,
@@ -29,14 +32,16 @@ enum class TokenKind {
     Comma,
 };
 
-struct Token {
+struct Token
+{
     TokenKind kind;
     std::string text;
     int line;
     int col;
 };
 
-struct Lexer {
+struct Lexer
+{
     std::string src;
     size_t i = 0;
     int line = 1;

@@ -7,15 +7,6 @@
 
 using namespace std;
 
-/*
-  compile_unit:
-    - gera ByteFunc por handler
-    - suporta: local decl, assign, expr (calls), if/elseif/else, while, foreach (strings), return
-    - chamadas: se local com função -> dynamic call (OP_CALL with b == -2)
-                 se nome global/host -> OP_CALL with b == -1 and .s set to name
-    - not implemented: nested function literals (closures) — lançam runtime_error
-*/
-
 static int try_get_local(const unordered_map<string,int> &local_index, const string &name) {
     auto it = local_index.find(name);
     return it == local_index.end() ? -1 : it->second;
@@ -35,7 +26,6 @@ CompiledUnit compile_unit(UnitDecl *u) {
         ByteFunc bf;
         unordered_map<string,int> local_index;
 
-        // helper para adicionar local (retorna índice)
         auto add_local = [&](const string &name)->int {
             if(local_index.count(name)) return local_index.at(name);
             int id = (int)bf.locals.size();
@@ -44,13 +34,11 @@ CompiledUnit compile_unit(UnitDecl *u) {
             return id;
         };
 
-        // reserva local temporário (conservador)
         add_local("_tmp");
 
-        // emit helper
         auto emit = [&](const Op &op){ bf.code.push_back(op); };
 
-        // compile expression (recursivo)
+        // compile expression
         function<void(Expr*)> compile_expr;
         compile_expr = [&](Expr* e) {
             switch(e->kind) {
@@ -89,7 +77,7 @@ CompiledUnit compile_unit(UnitDecl *u) {
                 }
                 case Expr::KCallExpr: {
                     // some AST variants separate call-expression nodes; fallback: treat same as KCall
-                    // (if your AST doesn't have KCallExpr, ignore)
+                    // TODO
                     throw runtime_error("KCallExpr unsupported in this compile path");
                 }
                 case Expr::KFuncLiteral: {
@@ -105,7 +93,8 @@ CompiledUnit compile_unit(UnitDecl *u) {
         // compile block (stmts)
         // Note: this assumes Stmt has a set of kinds and fields consistent with the compiler.
         function<void(const vector<unique_ptr<Stmt>>&)> compile_block;
-        compile_block = [&](const vector<unique_ptr<Stmt>> &stmts) {
+        compile_block = [&](const vector<unique_ptr<Stmt>> &stmts)
+        {
             for(size_t si=0; si<stmts.size(); ++si) {
                 Stmt *st = stmts[si].get();
                 switch(st->kind) {
@@ -263,17 +252,14 @@ CompiledUnit compile_unit(UnitDecl *u) {
             } // for stmts
         }; // compile_block
 
-        // compile handler body
         compile_block(h->body);
-
-        // ensure function returns
         emit(Op(OP_RET,0,0));
 
         // push bf into module
         int idx = (int)cu.module.funcs.size();
         cu.module.funcs.push_back(move(bf));
         cu.module.handler_index[h->name] = idx;
-    } // handlers
+    }
 
     return cu;
 }

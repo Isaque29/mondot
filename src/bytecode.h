@@ -6,16 +6,6 @@
 #include <vector>
 #include <unordered_map>
 
-/*
- OpCodes estendidos para suportar:
-  - PUSH/STORE local/const/global
-  - CALL (host or dynamic)
-  - POP (descartar retorno)
-  - JMP / JMP_IF_FALSE
-  - PUSH_GLOBAL / STORE_GLOBAL
-  - basic helpers
-*/
-
 enum OpCode : uint8_t
 {
     OP_NOP = 0,
@@ -78,4 +68,4 @@ struct CompiledUnit
 
 CompiledUnit compile_unit(UnitDecl *u);
 
-#endif // MONDOT_BYTECODE_H
+#endif
