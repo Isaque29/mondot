@@ -7,7 +7,7 @@ unit Program
             n = add(n, 1);
             Print(n);
 
-            nif (n)
+            if (not(n))
                 return 0;
             end
         end

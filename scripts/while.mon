@@ -4,12 +4,13 @@ unit Program
         local desc = 'A while loop';
         local n = sub(0, 100000);
 
-        while (true)
+        while (1)
             n = add(n, 1);
             Print(n);
 
             if (n)
             else
+                Print('ok');
                 return 0;
             end
         end

@@ -14,6 +14,7 @@ using StmtPtr = std::unique_ptr<Stmt>;
 
 struct Expr {
     enum Kind {
+        KNil,
         KBoolean,
         KNumber,
         KString,

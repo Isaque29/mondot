@@ -132,10 +132,12 @@ unique_ptr<Stmt> Parser::parse_statement()
     if(cur.kind == TokenKind::Kw_foreach)
     {
         eat();
+        expect(TokenKind::LParen, "(");
         if(cur.kind != TokenKind::Identifier) throw runtime_error("expected identifier after foreach");
         string itname = cur.text; eat();
         expect(TokenKind::Kw_in, "in");
         auto iter_expr = parse_expression();
+        expect(TokenKind::RParen, ")");
         vector<unique_ptr<Stmt>> body;
         while(cur.kind != TokenKind::Kw_end) body.push_back(parse_statement());
 

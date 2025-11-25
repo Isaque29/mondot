@@ -7,17 +7,20 @@
 
 using namespace std;
 
-static int try_get_local(const unordered_map<string,int> &local_index, const string &name) {
+static int try_get_local(const unordered_map<string,int> &local_index, const string &name)
+{
     auto it = local_index.find(name);
     return it == local_index.end() ? -1 : it->second;
 }
 
-static int push_const(ByteFunc &bf, const Value &v) {
+static int push_const(ByteFunc &bf, const Value &v)
+{
     bf.consts.push_back(v);
     return (int)bf.consts.size() - 1;
 }
 
-CompiledUnit compile_unit(UnitDecl *u) {
+CompiledUnit compile_unit(UnitDecl *u)
+{
     ByteModule mod; mod.name = u->name;
     CompiledUnit cu; cu.module = mod;
 
@@ -40,10 +43,21 @@ CompiledUnit compile_unit(UnitDecl *u) {
 
         // compile expression
         function<void(Expr*)> compile_expr;
-        compile_expr = [&](Expr* e) {
+        compile_expr = [&](Expr* e)
+        {
             switch(e->kind) {
+                case Expr::KBoolean: {
+                    int ci = push_const(bf, Value::make_boolean(e->num));
+                    emit(Op(OP_PUSH_CONST, ci, 0));
+                    break;
+                }
                 case Expr::KNumber: {
                     int ci = push_const(bf, Value::make_number(e->num));
+                    emit(Op(OP_PUSH_CONST, ci, 0));
+                    break;
+                }
+                case Expr::KNil: {
+                    int ci = push_const(bf, Value::make_nil());
                     emit(Op(OP_PUSH_CONST, ci, 0));
                     break;
                 }
@@ -146,7 +160,8 @@ CompiledUnit compile_unit(UnitDecl *u) {
                         bf.code[jif_pos].a = (int)bf.code.size();
 
                         // elseif parts
-                        for(auto &ep : st->elseif_parts) {
+                        for(auto &ep : st->elseif_parts)
+                        {
                             // ep.first = cond (unique_ptr<Expr>), ep.second = vector<unique_ptr<Stmt>>
                             compile_expr(ep.first.get());
                             Op jif2(OP_JMP_IF_FALSE, 0, 0);
@@ -166,7 +181,8 @@ CompiledUnit compile_unit(UnitDecl *u) {
                         }
 
                         // else
-                        if(!st->else_body.empty()) {
+                        if(!st->else_body.empty())
+                        {
                             compile_block(st->else_body);
                         }
 
