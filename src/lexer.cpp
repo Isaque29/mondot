@@ -7,7 +7,8 @@ Lexer::Lexer(const string &s): src(s) {}
 
 char Lexer::peek() const { return i < src.size() ? src[i] : '\0'; }
 
-char Lexer::get() {
+char Lexer::get()
+{
     char c = peek();
     if(c == '\n') { line++; col = 1; }
     else col++;
@@ -17,8 +18,41 @@ char Lexer::get() {
 
 void Lexer::skip_ws()
 {
-    while(isspace((unsigned char)peek()))
-        get();
+    while(true) {
+        char p = peek();
+        if(p == '\0') return;
+        if(isspace((unsigned char)p))
+        {
+            get();
+            continue;
+        }
+
+        if(p == '-' && i+1 < src.size() && src[i+1] == '-')
+        {
+            get(); get();
+            while(peek() != '\n' && peek() != '\0') get();
+            continue;
+        }
+
+        if(p == '-' && i+1 < src.size() && src[i+1] == '[')
+        {
+            get(); get();
+
+            while(true)
+            {
+                if(peek() == '\0') return;
+                if(peek() == ']' && i+1 < src.size() && src[i+1] == '-')
+                {
+                    get(); get();
+                    break;
+                }
+                get();
+            }
+            continue;
+        }
+
+        break;
+    }
 }
 
 Token Lexer::next()
@@ -103,8 +137,6 @@ Token Lexer::next()
         t.text = s;
         return t;
     }
-
-    auto peek1 = [&]()->char { return (i+1 < src.size()) ? src[i+1] : '\0'; };
 
     char ch = get();
     switch(ch)

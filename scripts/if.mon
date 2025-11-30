@@ -1,8 +1,8 @@
 unit Ex
 {
     on MdReload -> ()
-        local desc = 'A if statement';
-        
+        -- A if statement
+
         local showld = true;
         if (showld)
             io.print('it\'s true!');

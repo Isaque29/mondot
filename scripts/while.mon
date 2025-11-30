@@ -1,7 +1,7 @@
 unit Program
 {
     on MdReload -> ()
-        local desc = 'A while loop';
+        -- A while loop
         local n = sub(0, 100000);
 
         while (1)
