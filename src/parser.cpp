@@ -54,6 +54,7 @@ unique_ptr<UnitDecl> Parser::parse_unit()
     {
         if(cur.kind == TokenKind::Kw_on) u->handlers.push_back(parse_handler());
         else u->handlers.push_back(parse_annon_handler());
+        //else throw runtime_error("expected 'on' in unit");
     }
     expect(TokenKind::RBrace, "}");
     return u;
@@ -65,7 +66,7 @@ unique_ptr<HandlerDecl> Parser::parse_annon_handler()
     h->name = "MdSuperInit";
     h->params = vector<string>();
 
-    while(cur.kind != TokenKind::Kw_end)
+    while(cur.kind != TokenKind::Kw_on && cur.kind != TokenKind::RBrace && cur.kind != TokenKind::End)
     {
         if(cur.kind == TokenKind::Semicolon)
         {
@@ -76,7 +77,7 @@ unique_ptr<HandlerDecl> Parser::parse_annon_handler()
         h->body.push_back(parse_statement());
     }
     return h;
-}   
+}
 
 unique_ptr<HandlerDecl> Parser::parse_handler()
 {
