@@ -86,8 +86,15 @@ Token Lexer::next()
             if(cc == '\\')
             {
                 char nx = get();
-                if(nx == 'n') s.push_back('\n');
-                else s.push_back(nx);
+                switch(nx) {
+                    case 'n': s.push_back('\n');  break;
+                    case 'r': s.push_back('\r');  break;
+                    case 't': s.push_back('\t');  break;
+                    case '\\': s.push_back('\\'); break;
+                    case '"': s.push_back('"');   break;
+                    case '\'': s.push_back('\''); break;
+                    default: s.push_back(nx);     break;
+                }
             }
             else s.push_back(cc);
         }
