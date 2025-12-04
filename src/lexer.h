@@ -25,6 +25,8 @@ enum class TokenKind
     Arrow,
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     LBrace,
     RBrace,
     Equal,

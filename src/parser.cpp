@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "facts.h"
 #include <stdexcept>
 #include <sstream>
 
@@ -49,12 +50,10 @@ unique_ptr<UnitDecl> Parser::parse_unit()
     auto u = make_unique<UnitDecl>();
     u->name = uname;
 
-    // TODO: better handling
     while(cur.kind != TokenKind::RBrace)
     {
         if(cur.kind == TokenKind::Kw_on) u->handlers.push_back(parse_handler());
         else u->handlers.push_back(parse_annon_handler());
-        //else throw runtime_error("expected 'on' in unit");
     }
     expect(TokenKind::RBrace, "}");
     return u;
@@ -222,14 +221,13 @@ unique_ptr<Stmt> Parser::parse_statement()
 
         vector<unique_ptr<Stmt>> body;
         while(cur.kind != TokenKind::Kw_end)
-        body.push_back(parse_statement());
+            body.push_back(parse_statement());
 
         expect(TokenKind::Kw_end, "end");
         return Stmt::make_foreach(itname, move(iter_expr), move(body));
     }
     if(cur.kind == TokenKind::Kw_return)
     {
-        // TODO: better handling
         eat();
         auto e = parse_expression();
         expect(TokenKind::Semicolon, ";");
@@ -261,7 +259,7 @@ unique_ptr<Stmt> Parser::parse_statement()
     }
 
     // literal expr stmt
-    if(cur.kind==TokenKind::String || cur.kind==TokenKind::Number || cur.kind==TokenKind::Boolean)
+    if(cur.kind==TokenKind::String || cur.kind==TokenKind::Number || cur.kind==TokenKind::Boolean || cur.kind==TokenKind::Nil)
     {
         auto e = parse_expression();
         expect(TokenKind::Semicolon, ";");
@@ -271,13 +269,29 @@ unique_ptr<Stmt> Parser::parse_statement()
     throw runtime_error("unsupported or unexpected token in statement");
 }
 
+static unique_ptr<Expr> parse_expression_prec(Parser &p, int min_prec);
+
 unique_ptr<Expr> Parser::parse_expression()
 {
-    return parse_primary();
+    return parse_expression_prec(*this, 0);
 }
 
 unique_ptr<Expr> Parser::parse_primary()
 {
+    // prefix unary (like !, - , ++x, --x)
+    if(facts::is_prefix(cur.kind))
+    {
+        TokenKind op = cur.kind;
+        string opname = cur.text;
+        eat();
+
+        auto rhs = parse_expression_prec(*this, facts::get_precedence(op));
+
+        vector<unique_ptr<Expr>> args;
+        args.push_back(move(rhs));
+        return make_unique<Expr>(opname, move(args));
+    }
+
     if(cur.kind == TokenKind::Boolean)
     {
         bool b = cur.text == "true"; eat();
@@ -311,8 +325,50 @@ unique_ptr<Expr> Parser::parse_primary()
     }
     if(cur.kind == TokenKind::LParen)
     {
-        // possibly func literal: (params) ... end
-        return parse_func_literal();
+        // disambiguate: function-literal ( (params) stmts end ) vs grouping ( (expr) )
+        // We'll do a conservative lookahead using a copy of the lexer to see if it looks like a function literal.
+        auto saved_lex = lex;
+        Token saved_cur = cur;
+
+        // simulate consuming '('
+        Token temp = saved_lex.next(); // now token after '('
+        bool looks_like_params = false;
+        if(temp.kind == TokenKind::RParen) {
+            // empty param list possible -> might be func literal
+            looks_like_params = true;
+        } else {
+            if(temp.kind == TokenKind::Identifier) {
+                // scan a simple param-list pattern ident (, ident)* )
+                looks_like_params = true;
+                // consume params
+                while(temp.kind == TokenKind::Identifier) {
+                    temp = saved_lex.next();
+                    if(temp.kind == TokenKind::Comma) temp = saved_lex.next();
+                    else break;
+                }
+                // after the loop, temp should be RParen for param-list
+                if(temp.kind != TokenKind::RParen) looks_like_params = false;
+            } else {
+                looks_like_params = false;
+            }
+        }
+        // if we saw params-like and after RParen the next token is a statement keyword, decide func-literal
+        if(looks_like_params) {
+            temp = saved_lex.next(); // token after RParen
+            if(temp.kind == TokenKind::Kw_end || temp.kind == TokenKind::Kw_local ||
+               temp.kind == TokenKind::Kw_if || temp.kind == TokenKind::Kw_while ||
+               temp.kind == TokenKind::Kw_foreach || temp.kind == TokenKind::Kw_return) {
+                // function literal
+                return parse_func_literal();
+            }
+            // else fallthrough -> grouping
+        }
+
+        // grouping: ( expr )
+        eat(); // consume '('
+        auto inner = parse_expression();
+        expect(TokenKind::RParen, ")");
+        return inner;
     }
     throw runtime_error(string("parse expr error at token '") + cur.text + "'");
 }
@@ -335,7 +391,6 @@ unique_ptr<Expr> Parser::parse_call_expr(const string &name)
     return e;
 }
 
-// function literal syntax: (p1, p2) stmts... end
 unique_ptr<Expr> Parser::parse_func_literal()
 {
     expect(TokenKind::LParen, "(");
@@ -358,7 +413,6 @@ unique_ptr<Expr> Parser::parse_func_literal()
         }
     }
     expect(TokenKind::RParen, ")");
-    // parse body until 'end'
     vector<unique_ptr<Stmt>> body;
     while(cur.kind != TokenKind::Kw_end)
         body.push_back(parse_statement());
@@ -369,4 +423,108 @@ unique_ptr<Expr> Parser::parse_func_literal()
     e->params = params;
     e->body = move(body);
     return e;
+}
+
+static unique_ptr<Expr> parse_call_or_member_or_index(Parser &p, unique_ptr<Expr> left)
+{
+    // cur is '(' or '['
+    while(true)
+    {
+        if(p.cur.kind == TokenKind::LParen)
+        {
+            if(left->kind == Expr::KIdent)
+            {
+                string callee = left->ident;
+                auto call = p.parse_call_expr(callee);
+                left = move(call);
+            }
+            else
+            {
+                p.expect(TokenKind::LParen, "(");
+                vector<unique_ptr<Expr>> args;
+                if(p.cur.kind != TokenKind::RParen)
+                {
+                    args.push_back(p.parse_expression());
+                    while(p.cur.kind == TokenKind::Comma)
+                    {
+                        p.eat();
+                        args.push_back(p.parse_expression());
+                    }
+                }
+                
+                p.expect(TokenKind::RParen, ")");
+                vector<unique_ptr<Expr>> callargs;
+
+                callargs.push_back(move(left));
+                for(auto &a : args) callargs.push_back(move(a));
+
+                auto e = make_unique<Expr>("<call>", move(callargs));
+                left = move(e);
+            }
+            continue;
+        }
+        else if(p.cur.kind == TokenKind::LBracket)
+        {
+            p.eat();
+            auto idx = p.parse_expression();
+            p.expect(TokenKind::RBracket, "]");
+            vector<unique_ptr<Expr>> args;
+            args.push_back(move(left));
+            args.push_back(move(idx));
+            left = make_unique<Expr>("[index]", move(args));
+            continue;
+        }
+        break;
+    }
+    return left;
+}
+
+static unique_ptr<Expr> parse_expression_prec(Parser &p, int min_prec)
+{
+    auto left = p.parse_primary();
+    while(true)
+    {
+        if(p.cur.kind == TokenKind::LParen || p.cur.kind == TokenKind::LBracket)
+        {
+            left = parse_call_or_member_or_index(p, move(left));
+            continue;
+        }
+
+        TokenKind tok = p.cur.kind;
+        int prec = facts::get_precedence(tok);
+        if(prec == 0) break;
+
+        if(facts::is_postfix(tok))
+        {
+            if(prec < min_prec) break;
+            string opname = p.cur.text;
+            p.eat();
+            vector<unique_ptr<Expr>> args;
+            args.push_back(move(left));
+            left = make_unique<Expr>(opname, move(args));
+            continue;
+        }
+        if(facts::is_infix(tok))
+        {
+            if(prec < min_prec) break;
+            int next_min_prec = prec;
+
+            if(!facts::is_right_associative(tok))
+                    next_min_prec = prec + 1;
+            else    next_min_prec = prec;
+
+            string opname = p.cur.text;
+            p.eat();
+
+            auto right = parse_expression_prec(p, next_min_prec);
+            vector<unique_ptr<Expr>> args;
+            args.push_back(move(left));
+            args.push_back(move(right));
+            left = make_unique<Expr>(opname, move(args));
+            continue;
+        }
+        break;
+    }
+
+    return left;
 }

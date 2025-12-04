@@ -143,6 +143,8 @@ Token Lexer::next()
     {
         case '(': t.kind = TokenKind::LParen; break;
         case ')': t.kind = TokenKind::RParen; break;
+        case '[': t.kind = TokenKind::LBracket; break;
+        case ']': t.kind = TokenKind::RBracket; break;
         case '{': t.kind = TokenKind::LBrace; break;
         case '}': t.kind = TokenKind::RBrace; break;
         case ';': t.kind = TokenKind::Semicolon; break;
