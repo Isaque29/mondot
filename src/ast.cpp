@@ -3,8 +3,6 @@
 
 using namespace std;
 
-// ---------------- Expr implementations ----------------
-
 Expr::Expr(): kind(KIdent), num(0.0) { }
 
 // number ctor
@@ -25,30 +23,36 @@ Expr::Expr(const std::string &name, vector<ExprPtr> &&a)
 { }
 
 // factories
-ExprPtr Expr::make_ident(const std::string &id) {
+ExprPtr Expr::make_ident(const std::string &id)
+{
     auto e = make_unique<Expr>();
     e->kind = KIdent;
     e->ident = id;
     return e;
 }
 
-ExprPtr Expr::make_number(double n) {
+ExprPtr Expr::make_number(double n)
+{
     return make_unique<Expr>(n);
 }
 
-ExprPtr Expr::make_boolean(bool n) {
+ExprPtr Expr::make_boolean(bool n)
+{
     return make_unique<Expr>(n);
 }
 
-ExprPtr Expr::make_string(const std::string &s) {
+ExprPtr Expr::make_string(const std::string &s)
+{
     return make_unique<Expr>(s, true);
 }
 
-ExprPtr Expr::make_call(const std::string &name, vector<ExprPtr> &&args) {
+ExprPtr Expr::make_call(const std::string &name, vector<ExprPtr> &&args)
+{
     return make_unique<Expr>(name, move(args));
 }
 
-ExprPtr Expr::make_funcliteral(vector<string> &&params, vector<StmtPtr> &&body) {
+ExprPtr Expr::make_funcliteral(vector<string> &&params, vector<StmtPtr> &&body)
+{
     auto e = make_unique<Expr>();
     e->kind = KFuncLiteral;
     e->params = move(params);
@@ -61,7 +65,8 @@ ExprPtr Expr::make_funcliteral(vector<string> &&params, vector<StmtPtr> &&body) 
 Stmt::Stmt(): kind(KExpr) { }
 
 // local declaration
-StmtPtr Stmt::make_local(const std::string &name, ExprPtr init) {
+StmtPtr Stmt::make_local(const std::string &name, ExprPtr init)
+{
     auto s = make_unique<Stmt>();
     s->kind = KLocalDecl;
     s->local_name = name;
@@ -70,7 +75,8 @@ StmtPtr Stmt::make_local(const std::string &name, ExprPtr init) {
 }
 
 // assignment
-StmtPtr Stmt::make_assign(const std::string &l, ExprPtr r) {
+StmtPtr Stmt::make_assign(const std::string &l, ExprPtr r)
+{
     auto s = make_unique<Stmt>();
     s->kind = KAssign;
     s->lhs = l;
@@ -79,7 +85,8 @@ StmtPtr Stmt::make_assign(const std::string &l, ExprPtr r) {
 }
 
 // expr stmt
-StmtPtr Stmt::make_expr(ExprPtr e) {
+StmtPtr Stmt::make_expr(ExprPtr e)
+{
     auto s = make_unique<Stmt>();
     s->kind = KExpr;
     s->expr = move(e);
@@ -87,7 +94,8 @@ StmtPtr Stmt::make_expr(ExprPtr e) {
 }
 
 // if
-StmtPtr Stmt::make_if(ExprPtr cond, vector<StmtPtr> &&then_body) {
+StmtPtr Stmt::make_if(ExprPtr cond, vector<StmtPtr> &&then_body)
+{
     auto s = make_unique<Stmt>();
     s->kind = KIf;
     s->cond = move(cond);
@@ -96,7 +104,8 @@ StmtPtr Stmt::make_if(ExprPtr cond, vector<StmtPtr> &&then_body) {
 }
 
 // while
-StmtPtr Stmt::make_while(ExprPtr cond, vector<StmtPtr> &&body) {
+StmtPtr Stmt::make_while(ExprPtr cond, vector<StmtPtr> &&body)
+{
     auto s = make_unique<Stmt>();
     s->kind = KWhile;
     s->cond = move(cond);
@@ -105,7 +114,8 @@ StmtPtr Stmt::make_while(ExprPtr cond, vector<StmtPtr> &&body) {
 }
 
 // foreach
-StmtPtr Stmt::make_foreach(const std::string &itname, ExprPtr iter_expr, vector<StmtPtr> &&body) {
+StmtPtr Stmt::make_foreach(const std::string &itname, ExprPtr iter_expr, vector<StmtPtr> &&body)
+{
     auto s = make_unique<Stmt>();
     s->kind = KForeach;
     s->iter_name = itname;
@@ -115,7 +125,8 @@ StmtPtr Stmt::make_foreach(const std::string &itname, ExprPtr iter_expr, vector<
 }
 
 // return
-StmtPtr Stmt::make_return(ExprPtr e) {
+StmtPtr Stmt::make_return(ExprPtr e)
+{
     auto s = make_unique<Stmt>();
     s->kind = KReturn;
     s->expr = move(e);

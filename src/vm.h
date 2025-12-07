@@ -7,14 +7,16 @@
 #include <vector>
 #include "module.h"
 
-struct Frame {
+struct Frame
+{
     Module *module = nullptr;
     ByteFunc *func = nullptr;
     std::vector<Value> locals;
     size_t ip = 0;
 };
 
-struct VM {
+struct VM
+{
     HostBridge &host;
     VM(HostBridge &h);
     void execute_handler(Module* m, const std::string &handler_name);

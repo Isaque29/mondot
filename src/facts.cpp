@@ -37,8 +37,8 @@ namespace facts
             case TokenKind::NotEqual:     return 50;
 
             // logical and / or
-            case TokenKind::Ampersand:       return 40; // &
-            case TokenKind::Pipe:         return 30; // |
+            case TokenKind::LogicalAnd:       return 40; // &
+            case TokenKind::LogicalOr:         return 30; // |
             case TokenKind::Equal:        return 10;
 
             default:

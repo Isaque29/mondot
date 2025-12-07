@@ -221,35 +221,23 @@ Token Lexer::next()
             break;
 
         case '&':
-            if(peek() == '&')
+            if(peek() == '=')
             {
                 get();
-                t.kind = TokenKind::LogicalAnd;
-                t.text = "&&";
-            }
-            else if(peek() == '=')
-            {
-                get();
-                t.kind = TokenKind::AmpersandEqual;
+                t.kind = TokenKind::LogicalAndEqual;
                 t.text = "&="; 
             }
-            else t.kind = TokenKind::Ampersand;
+            else t.kind = TokenKind::LogicalAnd;
             break;
 
         case '|':
-            if(peek() == '|')
+            if(peek() == '=')
             {
                 get();
-                t.kind = TokenKind::LogicalOr;
-                t.text = "||";
-            }
-            else if(peek() == '=')
-            {
-                get();
-                t.kind = TokenKind::PipeEqual;
+                t.kind = TokenKind::LogicalOrEqual;
                 t.text = "|=";
             }
-            else t.kind = TokenKind::Pipe;
+            else t.kind = TokenKind::LogicalOr;
             break;
 
         case '^':

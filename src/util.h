@@ -77,8 +77,8 @@ constexpr inline const char* token_kind_to_string(TokenKind k)
         case TokenKind::Greater: return "Greater";
         case TokenKind::GreaterEqual: return "GreaterEqual";
 
-        case TokenKind::Ampersand: return "And";
-        case TokenKind::Pipe: return "Or";
+        case TokenKind::LogicalAnd: return "And";
+        case TokenKind::LogicalOr: return "Or";
         case TokenKind::Exclamation: return "Exclamation";
 
         case TokenKind::Arrow: return "Arrow";

@@ -22,6 +22,7 @@ enum class TokenKind
     Kw_foreach,
     Kw_in,
     Kw_return,
+    
     Arrow,
     LParen,
     RParen,
@@ -29,7 +30,6 @@ enum class TokenKind
     RBracket,
     LBrace,
     RBrace,
-    Equal,
     Semicolon,
     Comma,
 
@@ -38,8 +38,11 @@ enum class TokenKind
     Star,
     Slash,
     Exclamation,
-    Ampersand,
-    Pipe,
+    LogicalAnd,
+    LogicalAndEqual,
+    LogicalOr,
+    LogicalOrEqual,
+    Equal,
     EqualEqual,
     NotEqual,
     ShiftLeftEqual,
@@ -50,10 +53,6 @@ enum class TokenKind
     GreaterEqual,
     ShiftRight,
     ShiftRightEqual,
-    LogicalAnd,
-    AmpersandEqual,
-    LogicalOr,
-    PipeEqual,
     MinusMinus,
     PlusPlus,
     PlusEqual,
@@ -65,8 +64,7 @@ enum class TokenKind
     Percent,
     PercentEqual,
     Tilde,
-    TildeEqual,
-    
+    TildeEqual, 
 };
 
 struct Token

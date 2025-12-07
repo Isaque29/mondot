@@ -10,7 +10,8 @@
 
 using HostFn = std::function<Value(const std::vector<Value>&)>;
 
-struct HostBridge {
+struct HostBridge
+{
     std::atomic<uint32_t> next_rule_id{1};
     std::unordered_map<std::string, HostFn> functions;
 
