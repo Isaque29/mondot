@@ -356,7 +356,7 @@ namespace mondot_host
     static inline void register_extra_host_functions(HostBridge &host)
     {
         // input: read line from stdin (blocking) - returns string
-        host.register_function("input", [](const std::vector<Value> &args)->Value
+        host.register_function("io.input", [](const std::vector<Value> &args)->Value
         {
             std::string line;
             if (!std::getline(std::cin, line)) return Value::make_string(std::string());
