@@ -26,12 +26,12 @@
 *.a
 *.lib
 
-# Executables
-*.exe
-*.out
-*.app
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
 
-mondot
-mondot.exe
 .vscode
+build
 test
