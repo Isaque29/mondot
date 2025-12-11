@@ -9,9 +9,9 @@
 #include "util.h"
 #include "fileutil.h"
 #include "parser.h"
-#include "bytecode.h"
+#include "runtime/bytecode.h"
 #include "module.h"
-#include "vm.h"
+#include "runtime/vm.h"
 #include "host.h"
 #include "host_core_funcs.h"
 

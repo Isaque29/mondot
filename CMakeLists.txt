@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(mondot LANGUAGES CXX)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,7 +20,10 @@ file(GLOB_RECURSE MONDOT_SOURCES
 
 add_executable(mondot ${MONDOT_SOURCES})
 
-target_include_directories(mondot PRIVATE "${SRC_DIR}")
+target_include_directories(mondot PRIVATE
+    "${SRC_DIR}"
+    "${SRC_DIR}/runtime"
+)
 
 if (MSVC)
   target_compile_options(mondot PRIVATE /W4 /permissive-)
