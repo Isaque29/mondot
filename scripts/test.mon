@@ -1,0 +1,10 @@
+unit Ex
+{
+    on X -> ()
+        io.print('ghi');
+    end
+
+    on MdReload -> ()
+        io.print(typeof());
+    end
+}

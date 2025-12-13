@@ -1,7 +1,7 @@
 #ifndef MONDOT_MODULE_H
 #define MONDOT_MODULE_H
 
-#include "runtime/bytecode.h"
+#include "bytecode.h"
 #include <atomic>
 #include <string>
 #include <unordered_map>

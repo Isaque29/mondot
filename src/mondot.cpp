@@ -10,10 +10,10 @@
 #include "fileutil.h"
 #include "parser.h"
 #include "runtime/bytecode.h"
-#include "module.h"
+#include "runtime/module.h"
 #include "runtime/vm.h"
-#include "host.h"
-#include "host_core_funcs.h"
+#include "runtime/host.h"
+#include "runtime/host_core_funcs.h"
 
 using namespace std;
 namespace fs = std::filesystem;

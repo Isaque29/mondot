@@ -2,6 +2,7 @@
 #include "util.h"
 #include <iostream>
 #include <stdexcept>
+#include <optional>
 
 using namespace std;
 
@@ -147,21 +148,18 @@ Value VM::call_bytecode_function(Module* m, int func_idx, const vector<Value> &a
                     if(args_ptr && nargs>0) arg_scratch.insert(arg_scratch.end(), args_ptr, args_ptr + nargs);
                     eval_stack.resize(sp - (size_t)nargs);
 
-                    if(host.has_function(op.s))
-                    {
-                        Value ret = host.call_function(op.s, arg_scratch);
-                        eval_stack.push_back(ret);
-                    }
+                    // call host once and check optional (avoids double lookup)
+                    auto maybe = host.call_function(op.s, arg_scratch);
+                    if(maybe)
+                        eval_stack.push_back(*maybe);
                     else
                     {
-                        errlog("CALL: unknown function " + op.s);
+                        errlog("CALL: unknown host function: " + op.s);
                         eval_stack.push_back(Value::make_nil());
                     }
                 }
                 else
-                {
                     errlog("CALL: unsupported mode");
-                }
                 break;
             }
 
@@ -174,6 +172,7 @@ Value VM::call_bytecode_function(Module* m, int func_idx, const vector<Value> &a
                 Value cond = eval_stack.back(); eval_stack.pop_back();
                 bool truth = true;
                 if(cond.tag == Tag::Nil) truth = false;
+                else if(cond.tag == Tag::Boolean && !cond.boolean) truth = false;
                 else if(cond.tag == Tag::Number && cond.num == 0.0) truth = false;
                 if(!truth) ip = (size_t)op.a - 1;
                 break;
@@ -293,11 +292,9 @@ void VM::execute_handler_idx(Module* m, int idx)
                     if(args_ptr && nargs>0) arg_scratch.insert(arg_scratch.end(), args_ptr, args_ptr + nargs);
                     eval_stack.resize(sp - (size_t)nargs);
 
-                    if(host.has_function(op.s))
-                    {
-                        Value ret = host.call_function(op.s, arg_scratch);
-                        eval_stack.push_back(ret);
-                    }
+                    auto maybe = host.call_function(op.s, arg_scratch);
+                    if(maybe)
+                        eval_stack.push_back(*maybe);
                     else
                     {
                         errlog("CALL unknown host function: " + op.s);

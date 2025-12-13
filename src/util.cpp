@@ -16,7 +16,7 @@
 #include "lexer.h"
 #include "ast.h"
 #include "runtime/bytecode.h"
-#include "module.h"
+#include "runtime/module.h"
 
 static bool TERM_SUPPORTS_COLOR = false;
 
